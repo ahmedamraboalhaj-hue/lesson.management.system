@@ -1433,3 +1433,53 @@ tr:hover td {
         display: none !important;
     }
 }
+
+/* ══════════════════════════════════════════════════════════
+   DEMO MODE — Banner offset fixes
+   ══════════════════════════════════════════════════════════ */
+
+/* الـ banner ارتفاعه 34px — نعوّض الـ sidebar والـ content */
+body:has(#demo-banner) .sidebar {
+    top: 34px;
+    height: calc(100vh - 34px);
+}
+
+body:has(#demo-banner) .main-content {
+    padding-top: calc(3.5rem + 34px);
+}
+
+body:has(#demo-banner) .modal-overlay {
+    top: 34px;
+}
+
+/* Portal/grade overlays */
+body:has(#demo-banner) #portal-overlay,
+body:has(#demo-banner) #grade-selection-overlay,
+body:has(#demo-banner) #group-selection-overlay {
+    top: 34px;
+    height: calc(100vh - 34px);
+}
+
+/* Splash overlay يبدأ من الأعلى كامل (قبل ما الـ banner يظهر) */
+#app-splash {
+    top: 0 !important;
+    height: 100vh !important;
+}
+
+/* ── موبايل ────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    body:has(#demo-banner) .main-content {
+        padding-top: calc(2rem + 34px);
+        margin-right: 0;
+    }
+
+    body:has(#demo-banner) .sidebar {
+        top: 34px;
+        height: calc(100vh - 34px);
+    }
+
+    /* Quick dock */
+    body:has(#demo-banner) .quick-dock {
+        bottom: 16px;
+    }
+}
