@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة الدروس الإلكتروني — نسخة تجريبية</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --gold:    #f59e0b;
+            --gold-lt: #fcd34d;
+            --cyan:    #06b6d4;
+            --cyan-lt: #67e8f9;
+            --navy:    #0f172a;
+            --navy-2:  #1e293b;
+            --navy-3:  #0f3460;
+            --glass:   rgba(255,255,255,0.05);
+            --glass-b: rgba(255,255,255,0.10);
+            --border:  rgba(255,255,255,0.08);
+        }
+
+        html, body {
+            min-height: 100vh;
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+            background: var(--navy);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        /* ── Animated Background ───────────────────────────── */
+        .bg-layer {
+            position: fixed; inset: 0; z-index: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 20% 10%, rgba(6,182,212,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 80% 80%, rgba(245,158,11,0.10) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 50% 50%, rgba(15,52,96,0.6) 0%, transparent 70%),
+                linear-gradient(135deg, #0a0f1e 0%, #0f172a 40%, #0c1a30 70%, #0a0f1e 100%);
+        }
+
+        /* floating orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.18;
+            animation: floatOrb 12s ease-in-out infinite;
+            pointer-events: none; z-index: 0;
+        }
+        .orb-1 { width: 500px; height: 500px; top: -120px; left: -100px; background: #06b6d4; animation-delay: 0s; }
+        .orb-2 { width: 380px; height: 380px; bottom: -80px; right: -80px; background: #f59e0b; animation-delay: -4s; }
+        .orb-3 { width: 280px; height: 280px; top: 40%; left: 45%; background: #8b5cf6; animation-delay: -8s; }
+
+        @keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33%       { transform: translate(30px, -40px) scale(1.06); }
+            66%       { transform: translate(-20px, 30px) scale(0.95); }
+        }
+
+        /* ── Grid Lines ─────────────────────────────────────── */
+        .grid-lines {
+            position: fixed; inset: 0; z-index: 0; opacity: 0.04;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        /* ── Main Container ──────────────────────────────────── */
+        .container {
+            position: relative; z-index: 10;
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 2rem 1rem;
+            gap: 0;
+        }
+
+        /* ── Hero Card ───────────────────────────────────────── */
+        .hero-card {
+            width: 100%; max-width: 820px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%);
+            border: 1px solid rgba(255,255,255,0.10);
+            border-radius: 32px;
+            padding: 3.5rem 3rem;
+            text-align: center;
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            box-shadow:
+                0 0 0 1px rgba(6,182,212,0.08),
+                0 32px 80px rgba(0,0,0,0.5),
+                inset 0 1px 0 rgba(255,255,255,0.08);
+            animation: cardIn 0.9s cubic-bezier(0.22,1,0.36,1) both;
+        }
+
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(40px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* ── Logo / Icon ─────────────────────────────────────── */
+        .logo-ring {
+            width: 100px; height: 100px;
+            margin: 0 auto 2rem;
+            position: relative;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .logo-ring::before {
+            content: '';
+            position: absolute; inset: 0;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, #06b6d4, #f59e0b, #8b5cf6, #06b6d4);
+            animation: rotateBorder 4s linear infinite;
+            padding: 3px;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor; mask-composite: exclude;
+        }
+        .logo-ring::after {
+            content: '';
+            position: absolute; inset: 3px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+        }
+        .logo-icon {
+            position: relative; z-index: 2;
+            font-size: 2.4rem;
+            background: linear-gradient(135deg, #06b6d4, #f59e0b);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        @keyframes rotateBorder { to { transform: rotate(360deg); } }
+
+        /* ── Headline ────────────────────────────────────────── */
+        .badge-demo {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(245,158,11,0.12);
+            border: 1px solid rgba(245,158,11,0.25);
+            color: var(--gold);
+            border-radius: 50px;
+            padding: 5px 18px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 1.4rem;
+            animation: pulse 3s ease infinite;
+        }
+        @keyframes pulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.2); }
+            50%      { box-shadow: 0 0 0 8px rgba(245,158,11,0); }
+        }
+
+        .main-title {
+            font-size: clamp(1.8rem, 4vw, 2.9rem);
+            font-weight: 900;
+            line-height: 1.25;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 40%, #67e8f9 70%, #fcd34d 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 30px rgba(6,182,212,0.3));
+        }
+
+        .sub-title {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            font-weight: 600;
+            color: var(--cyan);
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.5px;
+        }
+
+        .description {
+            font-size: 0.95rem;
+            color: rgba(226,232,240,0.65);
+            line-height: 1.8;
+            max-width: 580px;
+            margin: 0 auto 2.5rem;
+        }
+
+        /* ── Features Pills ──────────────────────────────────── */
+        .features {
+            display: flex; flex-wrap: wrap; gap: 10px;
+            justify-content: center;
+            margin-bottom: 2.8rem;
+        }
+        .feature-pill {
+            display: flex; align-items: center; gap: 7px;
+            background: rgba(6,182,212,0.08);
+            border: 1px solid rgba(6,182,212,0.18);
+            color: var(--cyan-lt);
+            border-radius: 50px;
+            padding: 6px 16px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            transition: all 0.25s;
+        }
+        .feature-pill:hover {
+            background: rgba(6,182,212,0.15);
+            border-color: rgba(6,182,212,0.4);
+            transform: translateY(-2px);
+        }
+        .feature-pill i { font-size: 0.75rem; }
+
+        /* ── CTA Button ──────────────────────────────────────── */
+        .cta-btn {
+            display: inline-flex; align-items: center; gap: 14px;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+            color: #0a0f1e;
+            border: none;
+            border-radius: 18px;
+            padding: 18px 48px;
+            font-size: 1.15rem;
+            font-weight: 900;
+            font-family: 'Cairo', sans-serif;
+            cursor: pointer;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.22,1,0.36,1);
+            box-shadow:
+                0 0 40px rgba(245,158,11,0.4),
+                0 8px 30px rgba(245,158,11,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+            animation: ctaPulse 3s ease-in-out infinite;
+        }
+        .cta-btn::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -60%;
+            width: 40%; height: 200%;
+            background: rgba(255,255,255,0.15);
+            transform: skewX(-20deg);
+            transition: left 0.5s;
+        }
+        .cta-btn:hover::before { left: 120%; }
+        .cta-btn:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow:
+                0 0 60px rgba(245,158,11,0.6),
+                0 16px 50px rgba(245,158,11,0.3),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+        .cta-btn:active { transform: translateY(-1px) scale(1.01); }
+        @keyframes ctaPulse {
+            0%,100% { box-shadow: 0 0 40px rgba(245,158,11,0.4), 0 8px 30px rgba(245,158,11,0.2); }
+            50%      { box-shadow: 0 0 60px rgba(245,158,11,0.6), 0 8px 40px rgba(245,158,11,0.3); }
+        }
+
+        /* ── Divider ─────────────────────────────────────────── */
+        .divider {
+            display: flex; align-items: center; gap: 18px;
+            margin: 2.8rem 0 2.4rem;
+            color: rgba(255,255,255,0.15);
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+        }
+        .divider-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(245,158,11,0.3), transparent); }
+
+        /* ── Developer Credit ────────────────────────────────── */
+        .dev-section {
+            text-align: center;
+        }
+        .dev-label {
+            font-size: 0.72rem;
+            letter-spacing: 3px;
+            color: rgba(255,255,255,0.3);
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+        .dev-name {
+            font-size: clamp(1.4rem, 3.5vw, 2rem);
+            font-weight: 900;
+            line-height: 1.2;
+            background: linear-gradient(135deg, #f59e0b 0%, #fcd34d 40%, #f59e0b 70%, #d97706 100%);
+            background-size: 200% 200%;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 4s ease infinite;
+            filter: drop-shadow(0 0 20px rgba(245,158,11,0.4));
+            margin-bottom: 0.5rem;
+        }
+        @keyframes shimmer {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .dev-role {
+            display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;
+            margin-top: 0.6rem;
+        }
+        .dev-role-tag {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 50px;
+            padding: 4px 14px;
+            font-size: 0.78rem;
+            color: rgba(226,232,240,0.6);
+            font-weight: 600;
+        }
+
+        /* ── Stats Row ───────────────────────────────────────── */
+        .stats-row {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin: 2.5rem 0 0;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-top: 2rem;
+        }
+        .stat-item { text-align: center; }
+        .stat-num {
+            font-size: 1.6rem; font-weight: 900;
+            background: linear-gradient(135deg, var(--cyan), var(--cyan-lt));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: block;
+        }
+        .stat-label { font-size: 0.78rem; color: rgba(255,255,255,0.4); margin-top: 4px; }
+
+        /* ── Bottom Footer ───────────────────────────────────── */
+        .page-footer {
+            position: relative; z-index: 10;
+            text-align: center;
+            padding: 1.6rem 1rem;
+            color: rgba(255,255,255,0.2);
+            font-size: 0.78rem;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            width: 100%;
+        }
+        .page-footer span { color: var(--gold); opacity: 0.7; }
+
+        /* ── Responsive ──────────────────────────────────────── */
+        @media (max-width: 600px) {
+            .hero-card { padding: 2.2rem 1.4rem; border-radius: 22px; }
+            .cta-btn { padding: 15px 32px; font-size: 1rem; }
+            .stats-row { grid-template-columns: repeat(3,1fr); gap: 10px; }
+            .stat-num { font-size: 1.3rem; }
+        }
+
+        /* ── Spinner on enter ────────────────────────────────── */
+        .loading-enter { display: none; }
+        .cta-btn.loading .cta-text { display: none; }
+        .cta-btn.loading .loading-enter { display: inline-flex; align-items: center; gap: 10px; }
+        .spin { animation: spin 0.8s linear infinite; display: inline-block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+
+<body>
+    <!-- Background layers -->
+    <div class="bg-layer"></div>
+    <div class="grid-lines"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <!-- Main Content -->
+    <div class="container">
+
+        <div class="hero-card">
+
+            <!-- Logo Ring -->
+            <div class="logo-ring">
+                <i class="fas fa-graduation-cap logo-icon"></i>
+            </div>
+
+            <!-- Demo Badge -->
+            <div class="badge-demo">
+                <i class="fas fa-circle" style="font-size:8px; animation: pulse 1s ease infinite;"></i>
+                Demo Version — نسخة عرض تجريبية
+            </div>
+
+            <!-- Main Headline -->
+            <h1 class="main-title">🚀 نظام إدارة الدروس الإلكتروني</h1>
+            <p class="sub-title">وداعاً للدفاتر الورقية... مرحباً بالإدارة الذكية</p>
+
+            <p class="description">
+                نظام متكامل لإدارة الطلاب والحضور والغياب والاشتراكات والامتحانات
+                والخزنة والتقارير داخل السناتر التعليمية — بواجهة عربية احترافية
+                تعمل بالكامل بدون إنترنت.
+            </p>
+
+            <!-- Feature Pills -->
+            <div class="features">
+                <div class="feature-pill"><i class="fas fa-users"></i> إدارة الطلاب</div>
+                <div class="feature-pill"><i class="fas fa-calendar-check"></i> حضور وغياب</div>
+                <div class="feature-pill"><i class="fas fa-file-invoice-dollar"></i> اشتراكات ومالية</div>
+                <div class="feature-pill"><i class="fas fa-chart-bar"></i> تقارير متقدمة</div>
+                <div class="feature-pill"><i class="fas fa-clipboard-list"></i> امتحانات ودرجات</div>
+                <div class="feature-pill"><i class="fas fa-piggy-bank"></i> خزينة يومية</div>
+                <div class="feature-pill"><i class="fas fa-qrcode"></i> كود QR للطلاب</div>
+                <div class="feature-pill"><i class="fas fa-wifi-slash"></i> يعمل بدون نت</div>
+            </div>
+
+            <!-- CTA Button -->
+            <a href="index.html" class="cta-btn" onclick="handleEnter(this)" id="enterBtn">
+                <span class="cta-text">
+                    <i class="fas fa-play-circle"></i>
+                    ▶️ دخول النسخة التجريبية
+                </span>
+                <span class="loading-enter">
+                    <i class="fas fa-circle-notch spin"></i>
+                    جاري التحميل...
+                </span>
+            </a>
+
+            <!-- Divider -->
+            <div class="divider">
+                <div class="divider-line"></div>
+                <span>Designed &amp; Developed By</span>
+                <div class="divider-line"></div>
+            </div>
+
+            <!-- Developer Credit -->
+            <div class="dev-section">
+                <div class="dev-name">ENG Ahmed Amr Aboulhaj</div>
+                <div class="dev-role">
+                    <span class="dev-role-tag"><i class="fas fa-code"></i> Software Developer</span>
+                    <span class="dev-role-tag"><i class="fas fa-school"></i> Educational Systems Developer</span>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-row">
+                <div class="stat-item">
+                    <span class="stat-num">20+</span>
+                    <div class="stat-label">وحدة وظيفية</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-num">PWA</span>
+                    <div class="stat-label">يعمل بدون نت</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-num">100%</span>
+                    <div class="stat-label">عربي متكامل</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Page Footer -->
+        <footer class="page-footer">
+            © 2026 All Rights Reserved &nbsp;·&nbsp;
+            Designed &amp; Developed By <span>ENG Ahmed Amr Aboulhaj</span>
+        </footer>
+
+    </div>
+
+    <script>
+        function handleEnter(btn) {
+            btn.classList.add('loading');
+            // لا نمنع الانتقال — فقط نُظهر الـ loader للحظة
+        }
+    </script>
+</body>
+</html>
